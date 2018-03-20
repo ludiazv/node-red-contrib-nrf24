@@ -7,7 +7,7 @@
   },
   "repository":{
     "type": "git",
-    "url": "https://github.com/ludiazv/node-nrf24.git"
+    "url": "https://github.com/ludiazv/node-red-contrib-nrf24.git"
   },
   "keywords": [
     "nrf24",
