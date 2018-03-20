@@ -1,0 +1,21 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": false,
+  "hostname": "zoraida.local",
+  "port": "22",
+  "target": "/home/boros/node-red-contrib-nrf24",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**",
+    "build",
+    "debug_key*",
+    "ssh_keys.ssh",
+    "node_modules/**",
+    ".nmpignore"
+  ],
+  "username": "boros",
+  "watch": [],
+  "transport": "scp",
+  "keyfile": "/Users/ldiaz/projects/node-modules/node-red-contrib-nrf24/debug_key"
+}

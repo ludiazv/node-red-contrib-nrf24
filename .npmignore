@@ -1,0 +1,7 @@
+.DS_Store
+node_modules
+debug_key
+debug_key.pub
+.remote-sync.json
+lgin.sh
+ssh_keys.sh

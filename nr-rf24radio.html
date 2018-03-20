@@ -1,0 +1,175 @@
+<script type="text/x-red" data-template-name="RF24radio">
+  <div class="form-row">
+      <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-config-input-name" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-board"><i class="fa fa-microchip"></i> Board profile</label>
+    <select id="node-config-input-board" style="width: 60%;">
+      <option value="" selected> ... </option>
+      <option value="rpi-borosRF2-0"> RPi - Boros RF2 Radio 0</option>
+      <option value="rpi-borosRF2-1"> RPi - Boros RF2 Radio 1</option>
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-cs"><i class="fa fa-microchip"></i> CS/SS PIN</label>
+      <input type="text" id="node-config-input-cs" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-ce"><i class="fa fa-microchip"></i> CE PIN</label>
+      <input type="text" id="node-config-input-ce" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-palevel"><i class="fa fa-plug"></i> PA Level</label>
+      <select id="node-config-input-palevel" style="width: 60%;">
+        <option value="0" selected >Minimun</option>
+        <option value="1">Low</option>
+        <option value="2">High</option>
+        <option value="3">Maximun</option>
+      </select>
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-datarate"><i class="fa fa-rocket"></i> Data Rate</label>
+      <select id="node-config-input-datarate" style="width: 60%;">
+        <option value="0" selected >1 Mbps</option>
+        <option value="1">2 Mbps</option>
+        <option value="2">250 Kbps</option>
+      </select>
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-payloadsize"><i class="fa fa-compress"></i> Payload Size</label>
+      <input type="text" id="node-config-input-payloadsize" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-channel"><i class="fa fa-exchange"></i> Channel</label>
+    <input type="text" id="node-config-input-channel" style="width: 60%;" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-retraisdelay"><i class="fa fa-clock-o"></i> Retray Delay</label>
+    <input type="text" id="node-config-input-retriesdelay" style="width: 60%;" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-retraiscount"><i class="fa fa-clock-o"></i> Retray Count</label>
+    <input type="text" id="node-config-input-retriescount" style="width: 60%;" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-crclength"><i class="fa fa-barcode"></i> CRC Length</label>
+    <select id="node-config-input-crclength" style="width: 60%;">
+      <option value="0">No CRC(disabled)</option>
+      <option value="1">8-bit CRC</option>
+      <option value="2" selected>16-bit CRC</option>
+    </select>
+  </div>
+
+  <div class="form-tips">
+       <b>Tip:</b>
+       On RPI CS: 0=SPI 0 / 1=SPI 1.
+       If spidev is used /dev/spideva.b CS= 10* a + b.
+       If supported board adaptors is used you can select board profile and
+       CS/CE pins will be filled with propper values.
+  </div>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType("RF24radio", {
+    category: "config",
+    icon:"bridge.png",
+    defaults: {
+      name: { value:"", required: false},
+      ce:   { value:"25", required: true,validate:RED.validators.number()},
+      cs:   { value:"0", required: true,validate:RED.validators.number()},
+      palevel: {value:"3", required: true, validate:function(v) {
+          var n=parseInt(v);
+          return !isNaN(n) && n>=0 && n<=3;
+      }},
+      datarate: {value:"0", required: true, validate:function(v) {
+        var n=parseInt(v);
+        return !isNaN(n) && n>=0 && n<=2;
+      }},
+      channel: {value:76, required: true, validate:function(v) {
+        var n=parseInt(v);
+        return !isNaN(n) && n>=1 && n<=127;
+      }},
+      crclength: {value:2, required: true, validate:function(v){
+        var n=parseInt(v);
+        return !isNaN(n) && n>=0 && n<=2;
+      }},
+      retriesdelay: {value:15, required:true, validate:RED.validators.number()},
+      retriescount: {value:15, required:true, validate:function(v) {
+        var n=parseInt(v);
+        return !isNaN(n) && n>=1 && n<=15;
+      }},
+      payloadsize: {value:32, required:true, validate:function(v){
+        var n=parseInt(v);
+        return !isNaN(n) && n>=1 && n<=32;
+      }}
+    },
+    label: function() {
+      return this.name ? this.name : "nrf24l01";
+    },
+    oneditprepare: function() {
+        $("#node-config-input-board").change(function() {
+            alert("TODO- Pending implementation for board profiles" + $(this).val());
+            $(this).val("");
+        });
+    }
+    /*
+    oneditprepare: function() {
+      function toggleSelect() {
+        var current = $('#node-config-input-bridge').val();
+        $('#node-config-input-bridge').replaceWith('<input type="text" id="node-config-input-bridge" style="width: 60%;"/>');
+        $('#node-config-input-bridge').val(current);
+      }
+      function toggleInput() {
+        var current = $('#node-config-input-bridge').val();
+        $('#node-config-input-bridge').replaceWith('<select id="node-config-input-bridge" style="width: 60%;"></select>');
+        $.get( 'philipshue/server')
+          .done( function(data) {
+            var bridges = JSON.parse(data);
+            if(bridges.length <= 0) {
+              RED.notify("No bridge found.", "error");
+            }
+            bridges.forEach(function(bridge) {
+              $('#node-config-input-bridge').append('<option value="' + bridge.ipaddress + '">' + bridge.name + '</option>');
+            });
+            $('#node-config-input-bridge').val(current);
+          })
+          .fail(function() {
+            RED.notify("Something went wrong.", "error");
+          });
+      }
+      $('#node-config-input-scan').click(function() {
+        if ($('#node-config-input-bridge').prop("tagName") === "INPUT") {
+          toggleInput();
+        } else {
+          toggleSelect();
+        }
+      });
+      $('#node-config-input-register').click(function() {
+        if(!$('#node-config-input-bridge').val()) {
+          RED.notify("Select your bridge before register", "error");
+        } else {
+          $.get('philipshue/register', { host: $('#node-config-input-bridge').val() } )
+            .done( function(data) {
+              $('#node-config-input-key').val(JSON.parse(data));
+            }).fail(function(err) {
+              RED.notify("Something went wrong: "+err.responseText, "error");
+            });
+        }
+      });
+    }*/
+  });
+</script>
+
+<script type="text/x-red" data-help-name="RF24radio">
+    <p>Configuration node nRF24 radios</p>
+
+    <h3>Inputs</h3>
+    <p> N/A </p>
+    <h3>Outputs</h3>
+    <h3>Details</h3>
+    <p> Configure radio parameters. All nodes using this radio
+        will share the configurartion of the radio.
+    </p>
+    <p> TODO describe parameters </p>
+</script>

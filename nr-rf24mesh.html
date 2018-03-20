@@ -1,0 +1,154 @@
+<script type="text/x-red" data-template-name="RF24mesh">
+
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+      <label for="node-input-radio"><i class="fa fa-microchip"></i> RF24 Radio</label>
+      <input type="text" id="node-input-radio" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+      <label for="node-input-nodeID"><i class="fa fa-idcard-o"></i> Node ID</label>
+      <input type="text" id="node-input-nodeID" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+      <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout(s)</label>
+      <input type="text" id="node-input-timeout" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+     <label for="node-input-cleandhcp"><i class="fa fa-eraser"></i> Reset DHCP</label>
+     <input type="checkbox" id="node-input-cleandhcp" style="width: 60%;" />
+  </div>
+  <div class="form-row node-input-rule-container-row">
+       <span id="mesh-rules-caption"></span>
+       <ol id="node-input-rule-container"></ol>
+  </div>
+
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType("RF24mesh", {
+    category: "nRF24l01",
+    color:"#A6BBCF",
+    icon:"bridge.png",
+    defaults: {
+      name:  {value:"", required: false},
+      radio: {type:"RF24radio", required: true},
+      nodeID: {value:"0", required:true, validate: function(v) {
+          var n=parseInt(v);
+          console.log("n:" + n + "check:" + (!isNaN(n) && n>=0 && n<=255));
+          return !isNaN(n) && n>=0 && n<=255;
+      }},
+      timeout: {value:"6",required:true,validate: function(v) {
+          var n=parseInt(v);
+          return !isNaN(n) && n>=0 && n<=120;
+      }},
+      cleandhcp: {value:false,required:true},
+      rules: { value:[], required:false ,validate:function() {return this.valid;}},
+    },
+    outputs:2,
+    inputs:1,
+    label: function() {
+      var n=this.name ? this.name : "RF24mesh";
+      return n + ((this.nodeID==0) ? "(M)" : "");
+    },
+    labelStyle: function() { return this.name?"node_label_italic":"";},
+    outputLabels: ["Incoming Frames", "Routing table"],
+    inputLabels: ["Outgoing Frames/Trigger"],
+    oneditprepare: function() {
+      $('#mesh-rules-caption').html("Incomming rules:"+ this.rules.length + " valid:" + this.valid);
+      $('#node-input-rule-container').css('min-height','300px').css('min-width','450px').editableList({
+                removable: true,
+                scrollOnAdd: true,
+                addItem: function(row,i,opt) {
+                          var rule=opt;
+                          if(!rule.hasOwnProperty('type')) rule={type:'0x41',max_len:32,as_string:false};
+
+                          var typeDef={
+                            value:"type",
+                            label:"type",
+                            //icon:"red/images/typedInput/09.png",
+                            validate: function(v) { var n=parseInt(v,16);
+                                return !isNaN(n) && v[0]=='0' && v[1].toUpperCase()=='X' && n>=0 && n<=127;
+                            }
+                          };
+
+                          var lenDef={
+                            value:"len",
+                            label:"Max Lenght",
+                            validate: function(v) {
+                              var n=parseInt(v);
+                              return !isNaN(n) && n>0 && n<128;
+                            }
+                          };
+                          var asDef={
+                            value:"asString",
+                            label:"As String?",
+                            options:["true","false"]
+                          };
+
+                          $('<input id="meshrule-type-' + i + '"/>').appendTo(row);
+                          $('<input id="meshrule-len-' + i + '" />').appendTo(row);
+                          $('<input id="meshrule-as-'+i+'" />').appendTo(row);
+                          $('#meshrule-type-' + i ).typedInput({
+                              types: [typeDef]
+                          });
+
+                          $('#meshrule-len-' + i).typedInput({
+                              types: [lenDef]
+                          });
+
+                          $('#meshrule-as-' + i).typedInput({
+                              types: [asDef]
+                          });
+
+                          $('#meshrule-type-' + i).typedInput('value',rule.type.toString());
+                          $('#meshrule-len-' + i).typedInput('value',rule.max_len.toString());
+                          $('#meshrule-as-' + i).typedInput('value',rule.as_string.toString());
+
+                } // AddItem
+
+      });// Editable List
+      // Aadd all rules to de editable list
+
+      for (var i=0; i<this.rules.length; i++) $("#node-input-rule-container").editableList('addItem',this.rules[i]);
+
+    } //oneditprepare
+    ,
+    oneditsave: function() {
+      try {
+        var srules=$("#node-input-rule-container").editableList('items');
+        this.valid=true;
+        var bck_rules=this.rules;
+        this.rules=[];
+        for(var i=0;i<srules.length;i++) {
+          var type=$(srules[i]).find('input[id^="meshrule-type-"]')[0];
+          var max_len=$(srules[i]).find('input[id^="meshrule-len-"]')[0];
+          var as=$(srules[i]).find('input[id^="meshrule-as-"]')[0];
+          this.rules.push({type:$(type).typedInput('value'),
+                               max_len: $(max_len).typedInput('value'),
+                               as_string: $(as).typedInput('value')
+          });
+
+          this.valid=this.valid && $(type).typedInput('validate') && $(max_len).typedInput('validate') &&
+             $(as).typedInput('validate');
+          console.log("pushed ->" + this.rules + "valud->" + this.valid);
+        }
+      }
+      catch(ex) {
+        console.log(ex);
+        this.valid=false;
+        this.rules=bck_rules;
+      }
+
+
+    } //
+
+  }); // registerType
+</script>
+
+<script type="text/x-red" data-help-name="RF24input">
+    <p>RF24Mesh Node</p>
+    <p> TODO </p>
+</script>

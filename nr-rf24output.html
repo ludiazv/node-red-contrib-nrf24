@@ -1,0 +1,50 @@
+<script type="text/x-red" data-template-name="RF24output">
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" />
+  </div>
+  <div class="form-row">
+      <label for="node-input-radio"><i class="fa fa-microchip"></i> RF24 Radio</label>
+      <input type="text" id="node-input-radio" />
+  </div>
+  <div class="form-row">
+      <label for="node-input-pipeaddress"><i class="fa fa-key"></i> Addr</label>
+      <input type="text" id="node-input-pipeaddress"
+       placeholder="Pipe address are 5 byte(40-bit) Hex number 0xDDDDDDDD"
+       style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto-ACK</label>
+     <input type="checkbox" id="node-input-autoack" style="width: 60%;" />
+  </div>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType("RF24output", {
+    category: "nRF24l01",
+    color:"#A6BBCF",
+    icon:"radio.png",
+    defaults: {
+      name:  {value:"", required: false},
+      radio: {type:"RF24radio", required: true},
+      pipeaddress:{ value:"0x65646f4e32", required: true, validate: function(v){
+        return v.length==12 && v[0]=="0" && v[1].toUpperCase()=="X" && !isNaN(parseInt(v,16));
+      }},
+      autoack: {value:true , required: true},
+    },
+    outputs:0,
+    inputs: 1,
+    align: 'right',
+    label: function() {
+      return this.name ? this.name : "RF24output";
+    },
+    labelStyle: function() { return this.name ? "node_label_italic" : "";},
+    outputLabels: ["outcomming Payloads"]
+
+  });
+</script>
+
+<script type="text/x-red" data-help-name="RF24input">
+    <p>RF24 OutputPipe</p>
+    <p> TODO </p>
+</script>

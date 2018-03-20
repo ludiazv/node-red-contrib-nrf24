@@ -1,0 +1,68 @@
+[
+    {
+        "id": "c6a78a87.f728d8",
+        "type": "tab",
+        "label": "RF24 test",
+        "disabled": true,
+        "info": ""
+    },
+    {
+        "id": "f9afd362.1b46",
+        "type": "RF24radio",
+        "z": "",
+        "name": "radio",
+        "ce": "6",
+        "cs": "10",
+        "palevel": "3",
+        "datarate": "0",
+        "channel": "76",
+        "crclength": "2",
+        "retriesdelay": "15",
+        "retriescount": "15",
+        "payloadsize": "32"
+    },
+    {
+        "id": "58bb306f.ed05",
+        "type": "RF24input",
+        "z": "c6a78a87.f728d8",
+        "name": "IN",
+        "radio": "f9afd362.1b46",
+        "outputstring": false,
+        "pipeaddress": "0x65646f4e31",
+        "autoack": true,
+        "outputs": 1,
+        "x": 130,
+        "y": 260,
+        "wires": [
+            [
+                "2ac450e1.9de13",
+                "67ea4ed4.29626"
+            ]
+        ]
+    },
+    {
+        "id": "2ac450e1.9de13",
+        "type": "debug",
+        "z": "c6a78a87.f728d8",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 404.5,
+        "y": 234,
+        "wires": []
+    },
+    {
+        "id": "67ea4ed4.29626",
+        "type": "RF24output",
+        "z": "c6a78a87.f728d8",
+        "name": "OUT",
+        "radio": "f9afd362.1b46",
+        "pipeaddress": "0x65646f4e32",
+        "autoack": true,
+        "inputs": 1,
+        "x": 430,
+        "y": 400,
+        "wires": []
+    }
+]
