@@ -18,11 +18,12 @@ module.exports = function(RED) {
     node.rcv=function(data){
       var msg={_msgid:RED.util.generateId(),
                pipeID:node.pipeID,
+               pipeAddress: node.pipeAddress,
                topic: node.topic,
                payload: (node.as_string) ? node.radio.convertToString(data) : data};
       node.send(msg);
       node.rxPck++;
-      node.status({fill:"green",shape:"dot",text:"A:"+ node.pipeAddress + "/Rx:"+node.rxPck});
+      node.status({fill:"green",shape:"dot",text:"A:"+ node.pipeAddress + " /Rx:"+node.rxPck});
     };
 
     if(node.radio.radio_ok && !node.radio.is_locked()) {

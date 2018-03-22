@@ -11,7 +11,7 @@ module.exports = function(RED) {
     if(node.radio.radio_ok && !node.radio.is_locked()) {
       node.radio.use();
       node.on('input',function(msg) {
-        var addr=("pipeAddress" in msg) ? msg.pipeAddress : node.pipeAddress;
+        var addr=("pipeAddressW" in msg) ? msg.pipeAddressW : node.pipeAddress;
         if(node.radio.write(node.radio.convertToBuffer(msg.payload),addr)) {
           node.txPck++;
         } else {

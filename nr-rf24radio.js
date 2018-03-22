@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = function(RED) {
 
   const nrf24_module=require('nrf24');
