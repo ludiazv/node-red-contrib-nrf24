@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository":{
+  "repository": {
     "type": "git",
     "url": "https://github.com/ludiazv/node-red-contrib-nrf24.git"
   },
@@ -28,18 +28,21 @@
     "RaspberryPi",
     "OrangePi"
   ],
-  "node-red"     : {
+  "node-red": {
     "nodes": {
-        "RF24radio":   "nr-rf24radio.js",
-        "RF24input":   "nr-rf24input.js",
-        "RF24output":  "nr-rf24output.js",
-        "RF24mesh":    "nr-rf24mesh.js"
-      }
+      "RF24radio": "nr-rf24radio.js",
+      "RF24input": "nr-rf24input.js",
+      "RF24output": "nr-rf24output.js",
+      "RF24mesh": "nr-rf24mesh.js"
+    }
   },
   "dependencies": {
     "bindings": "^1.3.0",
-    "nrf24": "0.0.0-alpha4"
+    "nrf24": "0.1.0-beta"
   },
   "author": "L Diaz",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^5.6.0"
+  }
 }
