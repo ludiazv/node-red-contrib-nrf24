@@ -8,15 +8,38 @@
       <input type="text" id="node-input-radio" />
   </div>
   <div class="form-row">
+    <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
+    <input type="text" id="node-input-topic">
+  </div>
+  <div class="form-row">
       <label for="node-input-pipeaddress"><i class="fa fa-key"></i> Addr</label>
       <input type="text" id="node-input-pipeaddress"
        placeholder="Pipe address are 5 byte(40-bit) Hex number 0xDDDDDDDD"
        style="width: 60%;"/>
   </div>
   <div class="form-row">
-     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto-ACK</label>
+     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto-Ack</label>
      <input type="checkbox" id="node-input-autoack" style="width: 60%;" />
   </div>
+  <div class="form-row">
+     <label for="node-input-writemode"><i class="fa fa-clock-o"></i> Write Mode</label>
+     <select id="node-input-writemode" style="width: 60%;">
+      <option value="0">Sync single Write</option>
+      <option value="1" selected>Async single Write</option>
+      <option value="2">Stream</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-mergetimeout"><i class="fa fa-stream"></i> Stream size</label>
+      <input type="text" id="node-input-streamsize">
+  </div>
+
+  <div class="form-tips">
+      <b>Tip:</b>
+      Remote address must be a 5 byte(40-bit) Hex number with format 0xhhhhhhhhhh<br>
+      Write Mode: Sync write / Async Write / Stream bytes bigger than payload size<br>
+      Stream size: Size in bytes of the stream chunk.(ignored if not in stream mode)
+ </div>
 </script>
 
 <script type="text/javascript">
@@ -27,19 +50,26 @@
     defaults: {
       name:  {value:"", required: false},
       radio: {type:"RF24radio", required: true},
+      topic: {value:"", required: false},
       pipeaddress:{ value:"0x65646f4e32", required: true, validate: function(v){
         return v.length==12 && v[0]=="0" && v[1].toUpperCase()=="X" && !isNaN(parseInt(v,16));
       }},
       autoack: {value:true , required: true},
+      writemode: {value: 1, required: true},
+      streamsize: {value:"512", required: true, validate: function(v){
+        var n=parseInt(v);
+        return !(isNaN(n) || n<32*2);
+      }}
     },
-    outputs:0,
+    outputs:1,
     inputs: 1,
     align: 'right',
     label: function() {
       return this.name ? this.name : "RF24output";
     },
     labelStyle: function() { return this.name ? "node_label_italic" : "";},
-    outputLabels: ["outcomming Payloads"]
+    outputLabels: ["Payloads Ack"],
+    inputLabels: ["Outgoing payloads"]
 
   });
 </script>

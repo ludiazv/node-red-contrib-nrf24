@@ -25,9 +25,18 @@
      <label for="node-input-outputstring"><i class="fa fa-check"></i> Output to string</label>
      <input type="checkbox" id="node-input-outputstring" style="width: 60%;" />
   </div>
+  <div class="form-row">
+      <label for="node-input-mergeframes"><i class="fa fa-archive"></i> Merge frames</label>
+      <input type="text" id="node-input-mergeframes">
+  </div>
+  <div class="form-row">
+      <label for="node-input-mergetimeout"><i class="fa fa-clock-o"></i> Merge timeout</label>
+      <input type="text" id="node-input-mergetimeout">
+  </div>
   <div class="form-tips">
        <b>Tip:</b>
        Remote address must be a 5 byte(40-bit) Hex number with format 0xhhhhhhhhhh
+       Merge Frames: Merge consecutive # frames within timeout defined.
   </div>
 </script>
 
@@ -44,7 +53,15 @@
       pipeaddress:{ value:"0x65646f4e31", required: true, validate: function(v){
         return v.length==12 && v[0]=="0" && v[1].toUpperCase()=="X" && !isNaN(parseInt(v,16));
       }},
-      autoack: {value:true , required: true}
+      autoack: {value:true , required: true},
+      mergeframes: {value:"1",required:true, validate: function(v) {
+        var n=parseInt(v);
+        return !isNaN(n) && n>=1 && n<=256;
+      }},
+      mergetimeout: {value:"1000",required:true, validate: function(v) {
+          var n=parseInt(v);
+          return !isNaN(n) && n>=10;
+      }}
     },
     inputs:0,
     outputs:1,

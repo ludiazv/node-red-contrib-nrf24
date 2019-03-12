@@ -20,12 +20,17 @@
       <input type="text" id="node-config-input-ce" style="width: 60%;"/>
   </div>
   <div class="form-row">
+      <label for="node-config-input-irq"><i class="fa fa-microchip"></i> IRQ PIN</label>
+      <input type="text" id="node-config-input-irq" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
       <label for="node-config-input-palevel"><i class="fa fa-plug"></i> PA Level</label>
       <select id="node-config-input-palevel" style="width: 60%;">
-        <option value="0" selected >Minimun</option>
+        <option value="0">Minimun</option>
         <option value="1">Low</option>
         <option value="2">High</option>
-        <option value="3">Maximun</option>
+        <option value="3" selected >Maximun</option>
+        <option value="4">Ultra - Si24R1</option>
       </select>
   </div>
   <div class="form-row">
@@ -60,27 +65,34 @@
       <option value="2" selected>16-bit CRC</option>
     </select>
   </div>
+  <div class="form-row">
+    <label for="node-config-input-basepoll"><i class="fa fa-clock-o"></i> Polling (us)</label>
+    <input type="text" id="node-config-input-basepoll" style="width: 60%;" />
+  </div>
 
   <div class="form-tips">
        <b>Tip:</b>
-       On RPI CS: 0=SPI 0 / 1=SPI 1.
+       On RPI CS: 0=SPI 0 / 1=SPI 1. <br>
        If spidev is used /dev/spideva.b CS= 10* a + b.
        If supported board adaptors is used you can select board profile and
-       CS/CE pins will be filled with propper values.
+       CS/CE/IRQ pins will be filled with propper values.
+       IRQ: <0 IRQ line is disabled. Polling will be used.
+       Polling: Time in microseconds of polling time (>4000us)
   </div>
 </script>
 
 <script type="text/javascript">
   RED.nodes.registerType("RF24radio", {
     category: "config",
-    icon:"bridge.png",
+    icon:"radio.png",
     defaults: {
       name: { value:"", required: false},
-      ce:   { value:"25", required: true,validate:RED.validators.number()},
+      ce:   { value:"24", required: true,validate:RED.validators.number()},
       cs:   { value:"0", required: true,validate:RED.validators.number()},
+      irq:  { value:"-1", required: true, validate:RED.validators.number()},
       palevel: {value:"3", required: true, validate:function(v) {
           var n=parseInt(v);
-          return !isNaN(n) && n>=0 && n<=3;
+          return !isNaN(n) && n>=0 && n<=4;
       }},
       datarate: {value:"0", required: true, validate:function(v) {
         var n=parseInt(v);
@@ -88,20 +100,27 @@
       }},
       channel: {value:76, required: true, validate:function(v) {
         var n=parseInt(v);
-        return !isNaN(n) && n>=1 && n<=127;
+        return !isNaN(n) && n>=0 && n<=126;
       }},
       crclength: {value:2, required: true, validate:function(v){
         var n=parseInt(v);
         return !isNaN(n) && n>=0 && n<=2;
       }},
-      retriesdelay: {value:15, required:true, validate:RED.validators.number()},
+      retriesdelay: {value:15, required:true, validate:function(v){
+        var n=parseInt(v);
+        return !isNaN(n) && n>=0 && n<=15;
+      }},
       retriescount: {value:15, required:true, validate:function(v) {
         var n=parseInt(v);
-        return !isNaN(n) && n>=1 && n<=15;
+        return !isNaN(n) && n>=0 && n<=15;
       }},
       payloadsize: {value:32, required:true, validate:function(v){
         var n=parseInt(v);
         return !isNaN(n) && n>=1 && n<=32;
+      }},
+      basepoll: {value: 40000, required:true, validate:function(v) {
+        var n=parseInt(v);
+        return !isNaN(n) && n> 4000;
       }}
     },
     label: function() {
