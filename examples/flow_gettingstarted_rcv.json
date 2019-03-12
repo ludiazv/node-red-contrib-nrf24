@@ -1,0 +1,78 @@
+[
+    {
+        "id": "14915975.c22897",
+        "type": "tab",
+        "label": "call_response_rcv",
+        "disabled": true,
+        "info": ""
+    },
+    {
+        "id": "42d91f55.41b69",
+        "type": "RF24input",
+        "z": "14915975.c22897",
+        "name": "Rcv",
+        "topic": "nrf24",
+        "radio": "fe91ad2b.0fbe8",
+        "outputstring": false,
+        "pipeaddress": "0x65646f4e31",
+        "autoack": true,
+        "mergeframes": "1",
+        "mergetimeout": "2000",
+        "x": 210,
+        "y": 2280,
+        "wires": [
+            [
+                "db364d9a.35ae4",
+                "ec1a9c85.bf22e"
+            ]
+        ]
+    },
+    {
+        "id": "db364d9a.35ae4",
+        "type": "debug",
+        "z": "14915975.c22897",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 530,
+        "y": 2200,
+        "wires": []
+    },
+    {
+        "id": "ec1a9c85.bf22e",
+        "type": "RF24output",
+        "z": "14915975.c22897",
+        "name": "Snd Ack",
+        "radio": "fe91ad2b.0fbe8",
+        "pipeaddress": "0x65646f4e32",
+        "autoack": true,
+        "writemode": "0",
+        "x": 510,
+        "y": 2380,
+        "wires": [
+            [
+                "db364d9a.35ae4"
+            ]
+        ]
+    },
+    {
+        "id": "fe91ad2b.0fbe8",
+        "type": "RF24radio",
+        "z": "",
+        "name": "radio0",
+        "ce": "24",
+        "cs": "0",
+        "irq": "27",
+        "palevel": "1",
+        "datarate": "0",
+        "channel": "76",
+        "crclength": "2",
+        "retriesdelay": "15",
+        "retriescount": "5",
+        "payloadsize": "32",
+        "basepoll": "40000"
+    }
+]

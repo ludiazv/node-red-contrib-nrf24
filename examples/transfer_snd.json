@@ -1,0 +1,169 @@
+[
+    {
+        "id": "5d94ef7.31e111",
+        "type": "tab",
+        "label": "transfer_snd",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2d9ea43e.0e105c",
+        "type": "inject",
+        "z": "5d94ef7.31e111",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 180,
+        "y": 220,
+        "wires": [
+            [
+                "2582d41f.911ecc",
+                "50ff936.4a5f36c"
+            ]
+        ]
+    },
+    {
+        "id": "2582d41f.911ecc",
+        "type": "function",
+        "z": "5d94ef7.31e111",
+        "name": "Make big buffer",
+        "func": "msg.payload=Buffer.alloc(512*1024); // 512Kb\nmsg.payload.fill(0);\nmsg.topic=\"nrf24\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 340,
+        "wires": [
+            [
+                "42f83b8d.72dad4"
+            ]
+        ]
+    },
+    {
+        "id": "42f83b8d.72dad4",
+        "type": "split",
+        "z": "5d94ef7.31e111",
+        "name": "",
+        "splt": "512",
+        "spltType": "len",
+        "arraySplt": "512",
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 510,
+        "y": 340,
+        "wires": [
+            [
+                "47cfc01c.a357d"
+            ]
+        ]
+    },
+    {
+        "id": "47cfc01c.a357d",
+        "type": "RF24output",
+        "z": "5d94ef7.31e111",
+        "name": "transfer snd",
+        "radio": "fe91ad2b.0fbe8",
+        "topic": "",
+        "pipeaddress": "0x544d52687C",
+        "autoack": true,
+        "writemode": "2",
+        "streamsize": "512",
+        "x": 670,
+        "y": 340,
+        "wires": [
+            [
+                "95348fc3.ac104"
+            ]
+        ]
+    },
+    {
+        "id": "50ff936.4a5f36c",
+        "type": "function",
+        "z": "5d94ef7.31e111",
+        "name": "speed calucaltor",
+        "func": "var p=msg.payload;\nif(Array.isArray(p)) {\n    var s=context.get('started');\n    msg.payload=\"rate->\" + p[1]/(p[0]-s) + \"Kb/s\";\n} else\n{\n    context.set('started',p);\n    return null;\n}\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 910,
+        "y": 100,
+        "wires": [
+            [
+                "458bd29a.20978c"
+            ]
+        ]
+    },
+    {
+        "id": "458bd29a.20978c",
+        "type": "debug",
+        "z": "5d94ef7.31e111",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 990,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "95348fc3.ac104",
+        "type": "join",
+        "z": "5d94ef7.31e111",
+        "name": "reduce",
+        "mode": "reduce",
+        "build": "string",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "$A+payload.length",
+        "reduceInit": "0",
+        "reduceInitType": "num",
+        "reduceFixup": "[$millis(),$A]",
+        "x": 790,
+        "y": 200,
+        "wires": [
+            [
+                "50ff936.4a5f36c"
+            ]
+        ]
+    },
+    {
+        "id": "621927c6.3399d8",
+        "type": "comment",
+        "z": "5d94ef7.31e111",
+        "name": "transfer",
+        "info": "Send 512Kb in stream mode in 512byte chunks using \nsplit/join nodes. \n\n",
+        "x": 150,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "fe91ad2b.0fbe8",
+        "type": "RF24radio",
+        "z": "",
+        "name": "radio0",
+        "ce": "24",
+        "cs": "0",
+        "irq": "27",
+        "palevel": "0",
+        "datarate": "0",
+        "channel": "76",
+        "crclength": "1",
+        "retriesdelay": "15",
+        "retriescount": "5",
+        "payloadsize": "32",
+        "basepoll": "40000"
+    }
+]

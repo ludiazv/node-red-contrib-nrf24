@@ -1,0 +1,150 @@
+[
+    {
+        "id": "31c27a5d.62aa36",
+        "type": "tab",
+        "label": "call_response_snd",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a45c3598.e967d8",
+        "type": "RF24output",
+        "z": "31c27a5d.62aa36",
+        "name": "Request",
+        "radio": "fe91ad2b.0fbe8",
+        "pipeaddress": "0x65646f4e32",
+        "autoack": true,
+        "writemode": 1,
+        "x": 360,
+        "y": 140,
+        "wires": [
+            [
+                "8ed83e7d.cf423"
+            ]
+        ]
+    },
+    {
+        "id": "285b7281.3e542e",
+        "type": "inject",
+        "z": "31c27a5d.62aa36",
+        "name": "trigger",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 100,
+        "y": 220,
+        "wires": [
+            [
+                "7b6f1070.5020f"
+            ]
+        ]
+    },
+    {
+        "id": "3f188d87.4d60e2",
+        "type": "debug",
+        "z": "31c27a5d.62aa36",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 750,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "7b6f1070.5020f",
+        "type": "change",
+        "z": "31c27a5d.62aa36",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "$ceil($.payload/1000)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 200,
+        "y": 80,
+        "wires": [
+            [
+                "a45c3598.e967d8"
+            ]
+        ]
+    },
+    {
+        "id": "f55f73f3.16292",
+        "type": "comment",
+        "z": "31c27a5d.62aa36",
+        "name": "Reduce to 32bit millis",
+        "info": "",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "8ed83e7d.cf423",
+        "type": "function",
+        "z": "31c27a5d.62aa36",
+        "name": "Reply check",
+        "func": "if('rf24_ack' in msg) {\n    context.set('rcv_buffer',msg.payload);\n    return null;\n} else {\n    var prev=context.get('rcv_buffer') || 0;\n    var n=msg.payload.readUInt32LE(0);\n    if(n==prev) \n        msg.payload=\"Response match \" + prev;\n    context.set('rcv_buffer',0);\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 580,
+        "y": 140,
+        "wires": [
+            [
+                "3f188d87.4d60e2"
+            ]
+        ]
+    },
+    {
+        "id": "271cc887.019388",
+        "type": "RF24input",
+        "z": "31c27a5d.62aa36",
+        "name": "Rcv Reply",
+        "topic": "nrf24",
+        "radio": "fe91ad2b.0fbe8",
+        "outputstring": false,
+        "pipeaddress": "0x65646f4e31",
+        "autoack": true,
+        "mergeframes": "1",
+        "mergetimeout": "1000",
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "8ed83e7d.cf423"
+            ]
+        ]
+    },
+    {
+        "id": "fe91ad2b.0fbe8",
+        "type": "RF24radio",
+        "z": "",
+        "name": "radio0",
+        "ce": "24",
+        "cs": "0",
+        "irq": "27",
+        "palevel": "1",
+        "datarate": "0",
+        "channel": "76",
+        "crclength": "2",
+        "retriesdelay": "15",
+        "retriescount": "5",
+        "payloadsize": "32",
+        "basepoll": "40000"
+    }
+]
