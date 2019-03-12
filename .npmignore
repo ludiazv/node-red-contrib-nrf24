@@ -5,3 +5,5 @@ debug_key.pub
 .remote-sync.json
 lgin.sh
 ssh_keys.sh
+.vscode
+npm_link.sh
