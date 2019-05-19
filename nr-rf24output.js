@@ -10,6 +10,7 @@ module.exports = function(RED) {
         node.radio=RED.nodes.getNode(n.radio);
         node.topic= n.topic || "";
         node.autoack= (n.autoack === undefined) ? true : n.autoack;
+        node.hidestats = (n.hidestats === undefined) ? false : n.hidestats;
         node.writemode= parseInt(n.writemode) || 0;
         node.streamsize= parseInt(n.streamsize) || 512;
         node.txPck=0;
@@ -25,9 +26,8 @@ module.exports = function(RED) {
                 color="red";
                 shape="ring";
             } else if(txf_ratio > 0.25) { shape="ring"; color="yellow";}
-            node.status({fill:color,shape:shape,text:"A:"+ addrs + 
-                         "/N:" + totalpck +
-                         "/Tx:"+node.txPck +"(" + (txf_ratio*100.0).toFixed(1) +"%)"});
+            var stats=(node.hidestats) ? "" : "/N:" + totalpck + "|Tx:"+node.txPck +"|" + (txf_ratio*100.0).toFixed(0) +"%";
+            node.status({fill:color,shape:shape,text:"A:"+ addrs + stats});
         };
         var get_async_wcallback= function(addr,msg,ack) {
             if(ack)
@@ -60,7 +60,7 @@ module.exports = function(RED) {
                 switch(node.writemode) {
                     case 0: //sync write
                         let success;
-                        if((success=node.radio.write(buffer,addr,aAck))) {
+                        if((success=node.radio.writeSync(buffer,addr,aAck))) {
                             node.txPck++;
                         } else{
                             node.txFail++;
@@ -88,7 +88,7 @@ module.exports = function(RED) {
             });
             // Relase node
             node.on("close",function(remove,done){ // Destructor
-                node.log("output node stopped removed:" + remove);
+                node.log("output node stopped, removed:" + remove);
                 node.radio.release();
                 done();
             });

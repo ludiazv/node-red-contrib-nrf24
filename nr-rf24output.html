@@ -22,6 +22,10 @@
      <input type="checkbox" id="node-input-autoack" style="width: 60%;" />
   </div>
   <div class="form-row">
+    <label for="node-input-hidestats"><i class="fa fa-check"></i> Hide Stats</label>
+    <input type="checkbox" id="node-input-hidestats" style="width: 60%;" />
+ </div>
+  <div class="form-row">
      <label for="node-input-writemode"><i class="fa fa-clock-o"></i> Write Mode</label>
      <select id="node-input-writemode" style="width: 60%;">
       <option value="0">Sync single Write</option>
@@ -55,6 +59,7 @@
         return v.length==12 && v[0]=="0" && v[1].toUpperCase()=="X" && !isNaN(parseInt(v,16));
       }},
       autoack: {value:true , required: true},
+      hidestats: {value:false, required:true},
       writemode: {value: 1, required: true},
       streamsize: {value:"512", required: true, validate: function(v){
         var n=parseInt(v);
