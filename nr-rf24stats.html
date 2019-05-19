@@ -1,0 +1,42 @@
+<script type="text/x-red" data-template-name="RF24stats">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-radio"><i class="fa fa-microchip"></i> RF24 Radio</label>
+        <input type="text" id="node-input-radio" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic">
+    </div>
+  </script>
+  
+  <script type="text/javascript">
+    RED.nodes.registerType("RF24stats", {
+      category: "nRF24l01",
+      color:"#A6BBCF",
+      icon:"feed.png",
+      defaults: {
+        name:  {value:"", required: false},
+        topic: {value:"nrf24stats", required: false},
+        radio: {type:"RF24radio", required: true},
+      },
+      inputs:1,
+      outputs:1,
+      label: function() {
+        return this.name ? this.name : "nRF24stats";
+      },
+      labelStyle: function() { return this.name ? "node_label_italic" : "";},
+      outputLabels: ["stats"],
+      inputLabels: "Trigger"
+  
+    });
+  </script>
+  
+  <script type="text/x-red" data-help-name="RF24stats">
+      <p>RF24 stats</p>
+      <p> TODO </p>
+  </script>
+  
