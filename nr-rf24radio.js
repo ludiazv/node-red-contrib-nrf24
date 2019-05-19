@@ -17,6 +17,7 @@ module.exports = function(RED) {
         node.cs = parseInt(n.cs);
         node.nrf24_module=nrf24_module;
         var irq= (n.irq === undefined) ? -1 : parseInt(n.irq);
+        node.autorecover = (n.autorecover === undefined ) ? false : n.autorecover;
         if(isNaN(irq)) irq= -1 ; 
         node.nrf24_configuration= {
             PALevel: parseInt(n.palevel),       //PALEvel
@@ -95,8 +96,11 @@ module.exports = function(RED) {
             node.radio.removeReadPipe(pipeID);
             node.read_pipes[pipeID-1]=null;
             node.used_pipes--;
-            node.log("Reading Pipe id:" + pipeID + " removed. Now listeing on "+node.read_pipes+" pipes");
-            if(node.read_pipes==0) node.nRF24.stopRead(); // Stop Reading
+            node.log("Reading Pipe id:" + pipeID + " removed. Now listeing on #"+node.used_pipes+" pipes");
+            if(node.read_pipes==0) {
+                node.log("No reading pipes selected: The reader thread will stop.");
+                node.nRF24.stopRead(); // Stop Reading
+            }
         };
 
         node.on("close",function(removed,done){
@@ -138,10 +142,13 @@ module.exports = function(RED) {
             } else {
                 node.write_in_progress=true;
                 var next=node.write_queue.pop();
+                //console.log("Next write" + JSON.stringify(next));
                 var maxs= (next.mode ==1 ) ? node.last_maxstream : next.maxstream;
                 var callback_wrapper=function(success,tx_ok, tx_b,req) {
                     next.callback(success,tx_ok,tx_b,req);
-                    node.log("wrapper->"+success+ " " +tx_ok + " "+ tx_b+ " "+ req);
+                    //node.log("wrapper->"+success+ " " +tx_ok + " "+ tx_b+ " "+ req);
+                    // Auto recover
+                    if(!success) node.DetectFailure();
                     setTimeout(node.write_sender,0);
                 };
                 node.sw_write(next.addr,next.auto_ack,maxs);
@@ -149,6 +156,16 @@ module.exports = function(RED) {
                 else node.nRF24.stream(next.d,callback_wrapper);
             }
         }
+        node.DetectFailure=function() {
+            if(node.nRF24.hasFailure()) {
+                node.error("Radio Faliure detected");
+                if(node.autorecover) {
+                    node.log("Auto failure recovery attempt");
+                    node.nRF24.restart();
+                }
+                node.write_queue = []; // Clean any pending read.
+            }
+        };
         // Switch write parameters
         node.sw_write=function(addr,auto_ack,maxstream) {
             if(node.last_write_addr == -1 || addr!=node.last_write_addr ||
@@ -165,7 +182,9 @@ module.exports = function(RED) {
             if(!node.radio_ok || node.is_locked()) return false;
             var d=(Buffer.isBuffer(data)) ? data : Buffer.from(data);
             node.sw_write(addr,auto_ack,node.last_maxstream);
-            return node.nRF24.write(d);
+            let success=node.nRF24.write(d);
+            if(!success) node.DetectFailure();
+            return success;
         }
 
         node.write=function(mode,data,addr,auto_ack,callback,maxstream) {
@@ -173,34 +192,65 @@ module.exports = function(RED) {
             if(!(callback instanceof Function) ) return false;
             if(!(mode == 1 || mode == 2 )) return false; // check only async writes
             var d=(Buffer.isBuffer(data)) ? data : Buffer.from(data);
-            node.log("data size:" + d.length );
+            //node.log(" Write request mode:" + mode + "data size:" + d.length );
             node.write_queue.unshift({mode:mode,d:d,addr:addr,auto_ack:auto_ack,callback:callback,maxstream:maxstream}); // Add to queue
             if(!node.write_in_progress) node.write_sender(); // Trigger send if no writing in progress
         };
 
 
+        // Stats
+        node.resetStats= function() {if(node.radio_ok && !node.is_locked()) node.nRF24.resetStats(); }
+        node.stats= function() {if(node.radio_ok && !node.is_locked()) return node.nRF24.getStats(); else return undefined; }
+        // failure handling
+        node.hasFailure=function()  { return node.hasFailure(); }
+        node.restart=function() { if(node.radio_ok && !node.is_locked()) node.nRF24.restart(); }
         // lock & unlock radio
-        node.lock_use=function()   { node.used_by_stack=true;  };
-        node.unlock_use=function() { node.used_by_stack=false; };
-        node.is_locked=function() { return node.usded_by_stack; };
-        node.use=function() { node.used++; };
-        node.release=function() { node.used--; if(node.used<0) node.used=0; };
-        node.is_used=function() { return node.used>0;};
+        node.lock_use=function()   { node.used_by_stack=true;  }
+        node.unlock_use=function() { node.used_by_stack=false; }
+        node.is_locked=function() { return node.usded_by_stack; }
+        node.use=function() { node.used++; }
+        node.release=function() { node.used--; if(node.used<0) node.used=0; }
+        node.is_used=function() { return node.used>0; }
 
         // Instanciate the radio
         node.radio_ok=false;
         try {
             node.nRF24=new nrf24_module.nRF24(node.ce,node.cs);
             node.radio_ok = node.nRF24.begin() && node.nRF24.present() && node.nRF24.powerUp();
-            node.nRF24.config(node.nrf24_configuration);
-            node.Pvariant=node.nRF24.isP();
-            node.nRF24.resetStats();
-            node.log("Radio RF24 started OK:" + node.radio_ok + " is nrf24l01+:" + node.Pvariant);
+            
+            if(node.radio_ok) {
+                // Send a dummmy payload to test failure
+                node.nRF24.config({PALevel: nrf24_module.RF24_PA_MIN,
+                                   DataRate:nrf24_module.RF24_1MBPS ,
+                                   Channel: 10,
+                                   CRCLength: parseInt(n.crclength),
+                                   retriesDelay: 15,
+                                   retriesCount: 5,
+                                   PayloadSize: 32,
+                                   AddressWidth: 5,
+                                   Irq: -1
+                                  });
+                node.nRF24.useWritePipe("0x0A0B0C0D0E",true); // Dummy address
+                node.nRF24.write(Buffer.from("dummy load"));
+                node.radio_ok = !node.nRF24.hasFailure();          // if failure is detected a problem with wiring is detected
+                if(node.radio_ok) { 
+                    node.nRF24.config(node.nrf24_configuration);
+                    node.Pvariant=node.nRF24.isP();
+                    node.nRF24.resetStats();
+                }
+            }
+
+            if(node.radio_ok) 
+                node.log("Radio RF24 started OK:" + node.radio_ok + " is nrf24l01+:" + node.Pvariant);
+            else
+                node.log("Radio Failed to initialize, wiring or hardware problem. FailureDetected:" + node.nRF24.hasFailure());
+
         }catch(err) {
-            node.error("Could not initialize RF24 radio ->" + err);
+            node.error("Exception <Could not initialize RF24 radio> =>" + err);
         }
 
     }
+    //Register the node
     RED.nodes.registerType("RF24radio",RF24radio);
 
 };

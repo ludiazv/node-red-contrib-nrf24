@@ -67,13 +67,12 @@ module.exports = function(RED) {
                         }
                         if(aAck) msg.rf24_ack=success; // Update messge
                         update_status(addr);  // show status
-                        if(aAck) return msg;  // send sync to node-red
+                        if(aAck) node.send(msg);  // send sync to node-red
                         break;
                     case 1: // Async write
                     case 2: // stream;
                         let callback=get_async_wcallback(addr,msg,aAck);
-                        let job_success=node.radio.write(node.writemode,buffer,addr,aAck,callback,node.streamsize);
-                      
+                        node.radio.write(node.writemode,buffer,addr,aAck,callback,node.streamsize);
                         //if(!job_success) {
                         //    node.txFail++;
                         //    node.error("Async job could not be started.");

@@ -69,15 +69,20 @@
     <label for="node-config-input-basepoll"><i class="fa fa-clock-o"></i> Polling (us)</label>
     <input type="text" id="node-config-input-basepoll" style="width: 60%;" />
   </div>
+  <div class="form-row">
+    <label for="node-config-input-autorecover"><i class="fa fa-tool"></i> Auto Failure recover</label>
+    <input type="checkbox" id="node-config-input-autorecover" style="width: 60%;" />
+ </div>
 
   <div class="form-tips">
        <b>Tip:</b>
        On RPI CS: 0=SPI 0 / 1=SPI 1. <br>
-       If spidev is used /dev/spideva.b CS= 10* a + b.
+       If spidev is used /dev/spideva.b CS= 10* a + b. <br>
        If supported board adaptors is used you can select board profile and
-       CS/CE/IRQ pins will be filled with propper values.
-       IRQ: <0 IRQ line is disabled. Polling will be used.
-       Polling: Time in microseconds of polling time (>4000us)
+       CS/CE/IRQ pins will be filled with propper values. <br>
+       IRQ: <0 IRQ line is disabled. Polling will be used. <br>
+       Polling: Time in microseconds of polling time (>4000us) <br>
+       Failure auto recover is experimental.
   </div>
 </script>
 
@@ -90,6 +95,7 @@
       ce:   { value:"24", required: true,validate:RED.validators.number()},
       cs:   { value:"0", required: true,validate:RED.validators.number()},
       irq:  { value:"-1", required: true, validate:RED.validators.number()},
+      autorecover: { value: false, required:true },
       palevel: {value:"3", required: true, validate:function(v) {
           var n=parseInt(v);
           return !isNaN(n) && n>=0 && n<=4;
