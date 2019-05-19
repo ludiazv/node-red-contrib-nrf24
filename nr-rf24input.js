@@ -7,13 +7,14 @@ module.exports = function(RED) {
         var node = this;
         
         node.pipeID=-1;
-        node.pipeAddress=n.pipeaddress;
-        node.autoAck=n.autoack;
+        node.pipeAddress="" + n.pipeaddress;
+        node.autoAck=(n.autoack === undefined) ? true : n.autoack;
         node.topic= n.topic || "nrf24";
-        node.as_string=n.outputstring || false;
+        node.as_string= (n.outputstring  === undefined) ? true : n.outputstring;
         node.radio=RED.nodes.getNode(n.radio);
-        node.mergeframes= n.mergeframes || 1;
-        node.mergetimeout= n.mergetimeout || 1000;
+        node.mergeframes= parseInt(n.mergeframes) || 1;
+        node.mergetimeout= parseInt(n.mergetimeout) || 1000;
+        node.hidestats= (n.hidestats === undefined ) ? false : n.hidestats;
       
         // Rcv Handler
         var mergeBuff=Buffer.alloc(0);
@@ -38,12 +39,13 @@ module.exports = function(RED) {
         };
         // Receive callaback
         node.rcv=function(data,rxStat){
-            if(timeoutControl==null && n.mergeframes> 1) { // If no timeout set programm itº
+            if(timeoutControl==null && node.mergeframes> 1) { // If no timeout set programm itº
                 timeoutControl=setTimeout(emitter,node.mergetimeout);
             }
             mergeBuff=Buffer.concat([mergeBuff,data],mergeBuff.length+data.length);
-            if(mergeBuff.length >= mergeSize || n.mergeframes==1) emitter();
-            node.status({fill:"green",shape:"dot",text:"A:"+ node.pipeAddress + " /Rx:"+rxStat});
+            if(mergeBuff.length >= mergeSize || node.mergeframes==1) emitter();
+            var stats=(node.hidestats) ? "" : "|Rx:"+rxStat;
+            node.status({fill:"green",shape:"dot",text:"A:"+ node.pipeAddress + stats });
         };
 
         if(node.radio.radio_ok && !node.radio.is_locked()) {
@@ -53,7 +55,7 @@ module.exports = function(RED) {
                 node.on("close",function(remove,done){
                     node.radio.deregisterReader(node.pipeID);
                     node.radio.release();
-                    node.log("input node stopped");
+                    node.log("input node stopped, removed:" + remove);
                     done();
                 });
                 this.status({fill:"green",shape:"dot",text:"A:"+ node.pipeAddress});

@@ -26,6 +26,10 @@
      <input type="checkbox" id="node-input-outputstring" style="width: 60%;" />
   </div>
   <div class="form-row">
+    <label for="node-input-hidestats"><i class="fa fa-check"></i> Hide Stats</label>
+    <input type="checkbox" id="node-input-hidestats" style="width: 60%;" />
+ </div>
+  <div class="form-row">
       <label for="node-input-mergeframes"><i class="fa fa-archive"></i> Merge frames</label>
       <input type="text" id="node-input-mergeframes">
   </div>
@@ -50,6 +54,7 @@
       topic: {value:"nrf24", required: false},
       radio: {type:"RF24radio", required: true},
       outputstring:{value:false, required: true},
+      hidestats: { value:false, required: true},
       pipeaddress:{ value:"0x65646f4e31", required: true, validate: function(v){
         return v.length==12 && v[0]=="0" && v[1].toUpperCase()=="X" && !isNaN(parseInt(v,16));
       }},
