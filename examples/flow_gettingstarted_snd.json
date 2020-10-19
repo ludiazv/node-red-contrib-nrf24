@@ -3,7 +3,7 @@
         "id": "31c27a5d.62aa36",
         "type": "tab",
         "label": "call_response_snd",
-        "disabled": false,
+        "disabled": true,
         "info": ""
     },
     {
@@ -12,9 +12,12 @@
         "z": "31c27a5d.62aa36",
         "name": "Request",
         "radio": "fe91ad2b.0fbe8",
+        "topic": "",
         "pipeaddress": "0x65646f4e32",
         "autoack": true,
+        "hidestats": false,
         "writemode": 1,
+        "streamsize": "512",
         "x": 360,
         "y": 140,
         "wires": [
@@ -28,18 +31,31 @@
         "type": "inject",
         "z": "31c27a5d.62aa36",
         "name": "trigger",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "repeat": "1",
+        "props": [
+            {
+                "p": "payload",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "string"
+            }
+        ],
+        "repeat": "5",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
         "x": 100,
         "y": 220,
         "wires": [
             [
-                "7b6f1070.5020f"
+                "7b6f1070.5020f",
+                "44117628.b293d8"
             ]
         ]
     },
@@ -52,8 +68,11 @@
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "true",
-        "x": 750,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
         "y": 200,
         "wires": []
     },
@@ -118,6 +137,7 @@
         "topic": "nrf24",
         "radio": "fe91ad2b.0fbe8",
         "outputstring": false,
+        "hidestats": false,
         "pipeaddress": "0x65646f4e31",
         "autoack": true,
         "mergeframes": "1",
@@ -131,6 +151,21 @@
         ]
     },
     {
+        "id": "44117628.b293d8",
+        "type": "RF24stats",
+        "z": "31c27a5d.62aa36",
+        "name": "Stats",
+        "topic": "nrf24stats",
+        "radio": "fe91ad2b.0fbe8",
+        "x": 260,
+        "y": 320,
+        "wires": [
+            [
+                "3f188d87.4d60e2"
+            ]
+        ]
+    },
+    {
         "id": "fe91ad2b.0fbe8",
         "type": "RF24radio",
         "z": "",
@@ -138,13 +173,17 @@
         "ce": "24",
         "cs": "0",
         "irq": "27",
-        "palevel": "1",
+        "spispeed": "10000000",
+        "autorecover": true,
+        "palevel": "2",
+        "enablelna": true,
         "datarate": "0",
         "channel": "76",
         "crclength": "2",
         "retriesdelay": "15",
         "retriescount": "5",
         "payloadsize": "32",
-        "basepoll": "40000"
+        "basepoll": "40000",
+        "txdelay": "250"
     }
 ]

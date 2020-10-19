@@ -11,19 +11,20 @@
         "type": "RF24input",
         "z": "14915975.c22897",
         "name": "Rcv",
-        "topic": "nrf24",
+        "topic": "nrf24_rcv",
         "radio": "fe91ad2b.0fbe8",
         "outputstring": false,
+        "hidestats": false,
         "pipeaddress": "0x65646f4e31",
         "autoack": true,
         "mergeframes": "1",
         "mergetimeout": "2000",
-        "x": 210,
-        "y": 2280,
+        "x": 450,
+        "y": 380,
         "wires": [
             [
-                "db364d9a.35ae4",
-                "ec1a9c85.bf22e"
+                "5a9e0e09.25fec8",
+                "d9ce552f.c46f3"
             ]
         ]
     },
@@ -32,31 +33,88 @@
         "type": "debug",
         "z": "14915975.c22897",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "true",
-        "x": 530,
-        "y": 2200,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 990,
+        "y": 360,
         "wires": []
     },
     {
         "id": "ec1a9c85.bf22e",
         "type": "RF24output",
         "z": "14915975.c22897",
-        "name": "Snd Ack",
+        "name": "Snd reply",
         "radio": "fe91ad2b.0fbe8",
+        "topic": "nrf24_resp",
         "pipeaddress": "0x65646f4e32",
         "autoack": true,
-        "writemode": "0",
-        "x": 510,
-        "y": 2380,
+        "hidestats": false,
+        "writemode": "1",
+        "streamsize": "512",
+        "x": 750,
+        "y": 480,
+        "wires": [
+            [
+                "d9ce552f.c46f3"
+            ]
+        ]
+    },
+    {
+        "id": "5a9e0e09.25fec8",
+        "type": "delay",
+        "z": "14915975.c22897",
+        "name": "not too fast",
+        "pauseType": "delay",
+        "timeout": "4",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 580,
+        "y": 520,
+        "wires": [
+            [
+                "ec1a9c85.bf22e"
+            ]
+        ]
+    },
+    {
+        "id": "d9ce552f.c46f3",
+        "type": "function",
+        "z": "14915975.c22897",
+        "name": "",
+        "func": "//if('rf24_ack' in msg) {\n//    context.set('rcv_buffer',msg.payload);\n//    return null;\n//} else {\n//    var prev=context.get('rcv_buffer') || 0;\n//    var n=msg.payload.readUInt32LE(0);\n//    if(n==prev) \n//        msg.payload=\"Response match \" + prev;\n//    context.set('rcv_buffer',0);\n//    return msg;\n//}\nif(msg.topic == \"nrf24_resp\"){\n    let n=msg.payload.readUInt32LE(0);\n    msg.payload=\"Recived \" + n + \" ack of echo:\" + msg.rf24_ack;\n    return msg;\n} \nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 840,
+        "y": 320,
         "wires": [
             [
                 "db364d9a.35ae4"
             ]
         ]
+    },
+    {
+        "id": "20f6d442.fb5574",
+        "type": "comment",
+        "z": "14915975.c22897",
+        "name": "Readme",
+        "info": "# Gettingstarted Sender\nThis flow is a compatible the ardunio getting started example as radionumber=1 end point.\n\n\nDelay node included ``not too fast`` is necesary to give some time to the arduino to switch to receive mode. Single boards computer can be to fast even with node-red overhead.",
+        "x": 540,
+        "y": 300,
+        "wires": []
     },
     {
         "id": "fe91ad2b.0fbe8",
@@ -66,13 +124,17 @@
         "ce": "24",
         "cs": "0",
         "irq": "27",
-        "palevel": "1",
+        "spispeed": "10000000",
+        "autorecover": true,
+        "palevel": "2",
+        "enablelna": true,
         "datarate": "0",
         "channel": "76",
         "crclength": "2",
         "retriesdelay": "15",
         "retriescount": "5",
         "payloadsize": "32",
-        "basepoll": "40000"
+        "basepoll": "40000",
+        "txdelay": "250"
     }
 ]
