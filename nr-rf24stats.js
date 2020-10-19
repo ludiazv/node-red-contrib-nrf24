@@ -12,13 +12,16 @@ module.exports = function(RED) {
         // init node
         if(node.radio.radio_ok && !node.radio.is_locked()) {
             node.radio.use();
-            node.on("input",function(msg) {
+            node.on("input",function(msg,send,done) {
+                // pre 1.0 compatibility
+                let send = send || function() { node.send.apply(node,arguments) }
                 
                if('payload' in msg && msg.payload=="reset"){
                    node.radio.resetStats();
                 } else {
                     msg.payload=node.radio.stats();
-                    node.send(msg);
+                    send(msg);
+                    if(done) done();
                }
                return null;
             });
