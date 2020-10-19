@@ -1,7 +1,9 @@
 "use strict";
 
 module.exports = function(RED) {
-  
+    
+    const nrutil=require("./nr-util");
+
     function RF24input(n) {
         RED.nodes.createNode(this,n);
         var node = this;
@@ -32,9 +34,9 @@ module.exports = function(RED) {
                     pipeID:node.pipeID,
                     pipeAddress: node.pipeAddress,
                     topic: node.topic,
-                    payload: (node.as_string) ? node.radio.convertToString(data) : data
+                    payload: (node.as_string) ? nrutil.convertToString(data) : data
                 };
-                node.send(msg);
+                node.send(msg,false);
             }
         };
         // Receive callaback
@@ -66,7 +68,7 @@ module.exports = function(RED) {
                 node.radio.release();
             }
         } else
-            this.status({fill:"red",shape:"ring",text:"RF24 not working or in use"});
+            this.status({fill:"red",shape:"ring",text:"RF24 radio not working or in use"});
 
     } // RF24input
 

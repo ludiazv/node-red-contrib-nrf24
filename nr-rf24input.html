@@ -4,7 +4,7 @@
       <input type="text" id="node-input-name" />
   </div>
   <div class="form-row">
-      <label for="node-input-radio"><i class="fa fa-microchip"></i> RF24 Radio</label>
+      <label for="node-input-radio"><i class="fa fa-microchip"></i> Radio</label>
       <input type="text" id="node-input-radio" />
   </div>
   <div class="form-row">
@@ -18,15 +18,15 @@
        style="width: 60%;"/>
   </div>
   <div class="form-row">
-     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto-ACK</label>
+     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto Ack</label>
      <input type="checkbox" id="node-input-autoack" style="width: 60%;" />
   </div>
   <div class="form-row">
-     <label for="node-input-outputstring"><i class="fa fa-check"></i> Output to string</label>
+     <label for="node-input-outputstring"><i class="fa fa-check"></i> As string</label>
      <input type="checkbox" id="node-input-outputstring" style="width: 60%;" />
   </div>
   <div class="form-row">
-    <label for="node-input-hidestats"><i class="fa fa-check"></i> Hide Stats</label>
+    <label for="node-input-hidestats"><i class="fa fa-check"></i> Hide stats</label>
     <input type="checkbox" id="node-input-hidestats" style="width: 60%;" />
  </div>
   <div class="form-row">
@@ -39,8 +39,8 @@
   </div>
   <div class="form-tips">
        <b>Tip:</b>
-       Remote address must be a 5 byte(40-bit) Hex number with format 0xhhhhhhhhhh
-       Merge Frames: Merge consecutive # frames within timeout defined.
+       <p>Remote address must be a 5 byte(40-bit) Hex number with format 0xhhhhhhhhhh</p>
+       <p>Merge Frames: Merge consecutive # frames within timeout(ms) defined.</p>
   </div>
 </script>
 
@@ -80,6 +80,46 @@
 </script>
 
 <script type="text/x-red" data-help-name="RF24input">
-    <p>RF24 input Pipe</p>
-    <p> TODO </p>
+  <p>Plain RF24 input node</p>
+  <p> This node enable node red to receive nrf24 payloads. Once a payload
+      this node emitts a new message. Radio payloads are binary <code>Buffers</code> set on
+      output's <code>msg.payload</code> property.
+  </p>
+  <p><b>Configuration</b></p>
+  <ul>
+    <li><code>Name</code> - Name of the node for identification</li>
+    <li><code>Radio</code> - Radio node to use (reference to configuration node) </li>
+    <li><code>Topic</code> - Topic set in the output message</li>
+    <li><code>Remote Addr</code> - Listen to payloads on this nrf24l01 pipe address. Must be a a 40bit hex number with the following format:<code>0xhhhhhhhhhh</code></li>
+    <li><code>Auto Ack</code> - Configure the receiveing pipe to respond with <code>ACK</code> to sender.</li>
+    <li><code>As string</code> - tries to convert to string the radio payload</li>
+    <li><code>Hide stats</code> - Hides stats on node status bar</li>
+    <li><code>Merge frames</code> - Maximun number of frames to merge. if <code>1</code> no merge will be done</li>
+    <li><code>Merge time</code> - Max time in milliseconds avaiable to merge frames. Apply if <code>Merge frames</code>i is >1</li>
+  </ul>
+  <p><b>Outputs</b>
+  <ul>
+    <li><code>msg.payload</code> - <i>Buffer</i> - radio frame or merged frames</li>
+    <li><code>msg.topic</code> - <i>string</i>   - configured topic</li>
+    <li><code>msg.pipeID</code> - <i>number</i>  - internal nrf24l01 pipe number</li>
+    <li><code>msg.pipAddress</code> - <i>string</i> - configured input pipe address in hex format </li>
+  </ul>
+
+  <p><b>Details</b></p>
+  <p> Merging logic enable better streaming performance. To enable merging <code>Merge frames</code> should
+      be set with the expected number of frames in the period defined in <code>Merge time</code> in milliseconds.
+      If mergin is configured the node will emitt new message over the output when the number of
+      received frames is equal to <code>Merge frames</code> or if the at least one frame has been received in the
+      specified timeout. This imply that the there is <b>no guarantees</b> that the each msg.payload has the seam size or
+      number of frames merged are allways the same in each event.
+  </p>
+        
+  <p> If more than one input nodes are used on the same radio.
+      All pipes address must share the first 4 bytes and only the last byte can be different.
+      For example if on input node is configured as <code>0xAB0035FF01</code> other 
+      inputs nodes must have be configured with an address like <code>0xAB0035FFxx</code>
+      where <code>xx</code> is and address byte different from <code>01</code>.
+      <b>This limitation is due to hardware and can not changed</b>
+  </p>
+    </script>
 </script>
