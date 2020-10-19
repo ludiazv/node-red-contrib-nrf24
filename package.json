@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "bindings": "^1.5.0",
-    "nrf24": "0.1.1-beta"
+    "nrf24": "0.1.7-beta"
   },
   "author": "L Diaz",
   "license": "MIT",
