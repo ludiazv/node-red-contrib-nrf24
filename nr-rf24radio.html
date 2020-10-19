@@ -7,21 +7,23 @@
     <label for="node-config-input-board"><i class="fa fa-microchip"></i> Board profile</label>
     <select id="node-config-input-board" style="width: 60%;">
       <option value="" selected> ... </option>
-      <option value="rpi-borosRF2-0"> RPi - Boros RF2 Radio 0</option>
-      <option value="rpi-borosRF2-1"> RPi - Boros RF2 Radio 1</option>
     </select>
   </div>
   <div class="form-row">
-      <label for="node-config-input-cs"><i class="fa fa-microchip"></i> CS/SS PIN</label>
+      <label for="node-config-input-cs"><i class="fa fa-microchip"></i> CS Pin</label>
       <input type="text" id="node-config-input-cs" style="width: 60%;"/>
   </div>
   <div class="form-row">
-      <label for="node-config-input-ce"><i class="fa fa-microchip"></i> CE PIN</label>
+      <label for="node-config-input-ce"><i class="fa fa-microchip"></i> CE Pin</label>
       <input type="text" id="node-config-input-ce" style="width: 60%;"/>
   </div>
   <div class="form-row">
-      <label for="node-config-input-irq"><i class="fa fa-microchip"></i> IRQ PIN</label>
+      <label for="node-config-input-irq"><i class="fa fa-microchip"></i> IRQ Pin</label>
       <input type="text" id="node-config-input-irq" style="width: 60%;"/>
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-spispeed"><i class="fa fa-microchip"></i> SPI Freq(Hz)</label>
+    <input type="text" id="node-config-input-spispeed" style="width: 60%;"/>
   </div>
   <div class="form-row">
       <label for="node-config-input-palevel"><i class="fa fa-plug"></i> PA Level</label>
@@ -30,9 +32,13 @@
         <option value="1">Low</option>
         <option value="2">High</option>
         <option value="3" selected >Maximun</option>
-        <option value="4">Ultra - Si24R1</option>
+        <!-- <option value="4">Ultra - Si24R1</option> -->
       </select>
   </div>
+  <div class="form-row">
+    <label for="node-config-input-enablelna"><i class="fa fa-wifi"></i> Enable Lna Gain</label>
+    <input type="checkbox" id="node-config-input-enablelna" style="width: 60%;" />
+ </div>
   <div class="form-row">
       <label for="node-config-input-datarate"><i class="fa fa-rocket"></i> Data Rate</label>
       <select id="node-config-input-datarate" style="width: 60%;">
@@ -66,27 +72,32 @@
     </select>
   </div>
   <div class="form-row">
-    <label for="node-config-input-basepoll"><i class="fa fa-clock-o"></i> Polling (us)</label>
+    <label for="node-config-input-basepoll"><i class="fa fa-clock-o"></i> Polling(us)</label>
     <input type="text" id="node-config-input-basepoll" style="width: 60%;" />
   </div>
   <div class="form-row">
-    <label for="node-config-input-autorecover"><i class="fa fa-tool"></i> Auto Failure recover</label>
+    <label for="node-config-input-txdelay"><i class="fa fa-clock-o"></i> TX delay(us)</label>
+    <input type="text" id="node-config-input-txdelay" style="width: 60%;" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-autorecover"><i class="fa fa-tools"></i> Auto Failure recover</label>
     <input type="checkbox" id="node-config-input-autorecover" style="width: 60%;" />
  </div>
 
   <div class="form-tips">
-       <b>Tip:</b>
-       On RPI CS: 0=SPI 0 / 1=SPI 1. <br>
-       If spidev is used /dev/spideva.b CS= 10* a + b. <br>
-       If supported board adaptors is used you can select board profile and
-       CS/CE/IRQ pins will be filled with propper values. <br>
-       IRQ: <0 IRQ line is disabled. Polling will be used. <br>
-       Polling: Time in microseconds of polling time (>4000us) <br>
-       Failure auto recover is experimental.
+       <p><b>Tip:</b></p>
+       <p>On RPI CS: 0=SPI 0 / 1=SPI 1.</p>
+       <p>If spidev is used /dev/spideva.b CS= 10* a + b.</p>
+       <p>If supported board adaptors is used you can select board profile and
+       <p>CS/CE/IRQ pins will be filled with propper values.</p>
+       <p>IRQ: <0 IRQ line is disabled. Polling will be used.</p>
+       <p>Polling: Time in microseconds of polling time (>4000us)</p>
+       <p>Failure auto recover is experimental.</p>
   </div>
 </script>
 
 <script type="text/javascript">
+
   RED.nodes.registerType("RF24radio", {
     category: "config",
     icon:"radio.png",
@@ -95,11 +106,13 @@
       ce:   { value:"24", required: true,validate:RED.validators.number()},
       cs:   { value:"0", required: true,validate:RED.validators.number()},
       irq:  { value:"-1", required: true, validate:RED.validators.number()},
-      autorecover: { value: false, required:true },
+      spispeed: { value:"10000000", required: true, validate:RED.validators.number() },
+      autorecover: { value: true, required:true },
       palevel: {value:"3", required: true, validate:function(v) {
           var n=parseInt(v);
           return !isNaN(n) && n>=0 && n<=4;
       }},
+      enablelna: { value: false, required: true},
       datarate: {value:"0", required: true, validate:function(v) {
         var n=parseInt(v);
         return !isNaN(n) && n>=0 && n<=2;
@@ -127,14 +140,33 @@
       basepoll: {value: 40000, required:true, validate:function(v) {
         var n=parseInt(v);
         return !isNaN(n) && n> 4000;
+      }},
+      txdelay: {value: 250, required:true, validate:function(v) {
+        var n=parseInt(v);
+        return !isNaN(v) && n < 5000;
       }}
     },
     label: function() {
       return this.name ? this.name : "nrf24l01";
     },
     oneditprepare: function() {
+          let boards=[];
+          $.getJSON('nrf24-boards',function(data) {
+            if(Array.isArray(data)) {
+              boards=data;
+              for(i=0;i<data.length;i++) {
+                if('board' in data[i]) $('#node-config-input-board').append(`<option value="${i}">${boards[i].board}</option>`);
+              }
+            }
+        });
+        
         $("#node-config-input-board").change(function() {
-            alert("TODO- Pending implementation for board profiles" + $(this).val());
+            let i=$(this).val();
+            if(i !="" && confirm(`Do you want to use radio configuration for "${boards[i].board}"?`)) {
+              for(const key in boards[i]) {
+                  $(`#${key}`).val(boards[i][key]);
+              }
+            }
             $(this).val("");
         });
     }
@@ -188,13 +220,35 @@
 
 <script type="text/x-red" data-help-name="RF24radio">
     <p>Configuration node nRF24 radios</p>
-
-    <h3>Inputs</h3>
-    <p> N/A </p>
-    <h3>Outputs</h3>
+    <p> This node represents the physical radio attached to the SBC and it's configuration</p>
+    <h3>Configuration</h3>
+    <p> All parameters are mandatory </p>
+    <ul>
+      <li><code>Board profile</code> - Helper with board profile to assing CS/CE/IRQ and SPI speed to standard hats.</li>
+      <li><code>CS Pin</code> - SPI interface to use. On RPI 0=SPI0,1=SPI1. Using default SPIDEV the CS value is computed using this formula <code>/dev/spideva.b CS= 10* a + b</code></li>
+      <li><code>CE Pin</code> - SBC Pin number (GPIO##) to which Radio CE pin is connected.</li>
+      <li><code>IRQ Pin</code> - SBC Pin number(GPIO##) to which Radio IRQ pin is connected. If IRQ is not used set -1.</li>
+      <li><code>SPI Freq(Hz)</code> - SPI frequency in Hertzs. Default value should work in most setups.</li>
+      <li><code>PA Level</code> - Radio output power. Range is improved with higher output power. (Min,Low,High,Max)</li>
+      <li><code>Enable Lna Gain</code> - For radio moudles with LNA amplifier or SiR24 clones enable power amplifier.</li>
+      <li><code>Data Rate</code> - Select bit rate (250kbps,1Mbps,2Mbps). 250kbps only avaiable in nrlf240+ versions.</li>
+      <li><code>Payload Size</code> - Size in bytes of the payload (1-32). Payloads are fixed in size, therefore a buffer of this size will be allways emitted by input nodes</li>
+      <li><code>Channel</code> - Channel number to use 0-126.</li>
+      <li><code>Retry Delay</code> - Time (n+1)*250us to wait between transmission retries (0-15)</li>
+      <li><code>Retry Count</code> - 0-15 If ACK is used this is max retry attempts the radio will try to resend a frame.if 0 no retries will be sent</li>
+      <li><code>CRC Length</code>  - No CRC, 8bit CRC or 16bit CRC </li>
+      <li><code>Polling(us)</code> - if IRQ is not used this will define the polling interval in us. Must be > 4000us.</li>
+      <li><code>TX Delay(us)</code> - Delay to switch between radio listening mode and transmitting mode.</li>
+      <li><code>Auto failure recovery</code> - The radio will be reset if a failure is detected.</li>
+    </ul>
     <h3>Details</h3>
-    <p> Configure radio parameters. All nodes using this radio
-        will share the configurartion of the radio.
+    <p> Please have in mind the following elements to configure & troubleshoot radio configuration </p>
+    <ul>
+      <li> All nodes using a radio will share the configurartion of the radio.</li>
+      <li> Check node-red's log to validate the correct initialization of the radio module.</li>
+      <li> Check __nrf24__  [here](https://github.com/ludiazv/node-nrf24) documentation about CS/CE wiring. </li>
+      <li> Two devices are able to communicate via radio if they use the __same channel, payload size, CRC and data rate__. </li>
+      <li> IRQ line is recommended for better performance and litmit CPU usage. IRQ is not used and Polling time will be used to poll the status of the radio. Poll time need to be >4ms (4,000us) to avoid CPU congestion. Chosing a short poll time will consume CPU cycles polling, converselly long polling time could represent the loss o radio packets.</li>
     </p>
-    <p> TODO describe parameters </p>
+    
 </script>
