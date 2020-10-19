@@ -1,37 +1,17 @@
 [
     {
-        "board":"rpi-BorosRF2-0",
-        "description": "BorosRF2",
-        "node-config-input-cs": 1,
-        "node-config-input-ce": 1,
-        "node-config-input-irq": -1
+        "board":"RPI-BorosRF2-0",
+        "node-config-input-cs": "0",
+        "node-config-input-ce": "24",
+        "node-config-input-irq": "27",
+        "node-config-input-spispeed":"10000000"
     },
     {
-        "board":"rpi-BorosRF2-1",
-        "description": "BorosRF2",
-        "node-config-input-cs": 1,
-        "node-config-input-ce": 1,
-        "node-config-input-irq": -1
-    },
-    {
-        "board":"OPi-BorosRF2-0",
-        "description": "BorosRF2",
-        "node-config-input-cs": 1,
-        "node-config-input-ce": 1,
-        "node-config-input-irq": -1
-    },
-    {
-        "board":"OPi-BorosRF2-1",
-        "description": "BorosRF2",
-        "node-config-input-cs": 1,
-        "node-config-input-ce": 1,
-        "node-config-input-irq": -1
-    },
-    {
-        "board":"BorosRF2-0",
-        "description": "BorosRF2",
-        "node-config-input-cs": 1,
-        "node-config-input-ce": 1,
-        "node-config-input-irq": -1
+        "board":"RPI-BorosRF2-1",
+        "node-config-input-cs": "1",
+        "node-config-input-ce": "25",
+        "node-config-input-irq": "22",
+        "node-config-input-spispeed":"10000000"
     }
+   
 ]
