@@ -85,11 +85,11 @@
       this node emitts a new message. Radio payloads are binary <code>Buffers</code> set on
       output's <code>msg.payload</code> property.
   </p>
-  <p><b>Configuration</b></p>
+  <h3>Configuration</h3>
   <ul>
     <li><code>Name</code> - Name of the node for identification</li>
     <li><code>Radio</code> - Radio node to use (reference to configuration node) </li>
-    <li><code>Topic</code> - Topic set in the output message</li>
+    <li><code>Topic</code> - Topic set in the output message <code>msg.topic</code></li>
     <li><code>Remote Addr</code> - Listen to payloads on this nrf24l01 pipe address. Must be a a 40bit hex number with the following format:<code>0xhhhhhhhhhh</code></li>
     <li><code>Auto Ack</code> - Configure the receiveing pipe to respond with <code>ACK</code> to sender.</li>
     <li><code>As string</code> - tries to convert to string the radio payload</li>
@@ -97,7 +97,7 @@
     <li><code>Merge frames</code> - Maximun number of frames to merge. if <code>1</code> no merge will be done</li>
     <li><code>Merge time</code> - Max time in milliseconds avaiable to merge frames. Apply if <code>Merge frames</code>i is >1</li>
   </ul>
-  <p><b>Outputs</b>
+  <h3>Outputs</h3>
   <ul>
     <li><code>msg.payload</code> - <i>Buffer</i> - radio frame or merged frames</li>
     <li><code>msg.topic</code> - <i>string</i>   - configured topic</li>
@@ -121,5 +121,18 @@
       where <code>xx</code> is and address byte different from <code>01</code>.
       <b>This limitation is due to hardware and can not changed</b>
   </p>
+  <p>
+    When the radio receive a frame the input node will output a Node-RED message on it's output with the following structure:
+  
+  <code>
+  { _msgid: "...." ,
+    topic: "<configured topic>",
+    pipeID: <id number>,
+    pipeAddress: "00xhhhhhhhhhh with the pipe Address",
+    payload: <Buffer with the data> or "<string with the data>" if 'output as string is selected'
+  }
+  </code>
+  </p>
+
     </script>
 </script>
