@@ -14,7 +14,7 @@ module.exports = function(RED) {
             node.radio.use();
             node.on("input",function(msg,send,done) {
                 // pre 1.0 compatibility
-                let send = send || function() { node.send.apply(node,arguments) }
+                send = send || function() { node.send.apply(node,arguments) };
                 
                if('payload' in msg && msg.payload=="reset"){
                    node.radio.resetStats();
