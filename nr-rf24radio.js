@@ -243,7 +243,12 @@ module.exports = function(RED) {
         node.stats= function() {if(node.radio_ok && !node.is_locked()) return node.nRF24.getStats(); else return undefined; }
         // failure handling
         node.hasFailure=function()  { return node.hasFailure(); }
-        node.restart=function() { if(node.radio_ok && !node.is_locked()) node.nRF24.restart(); }
+        node.restart=function() { 
+            if(node.radio_ok && !node.is_locked()) {
+                node.warn("Radio restarted");
+                node.nRF24.restart();
+            }
+        }
         // lock & unlock radio
         node.lock_use=function()   { node.used_by_stack=true;  }
         node.unlock_use=function() { node.used_by_stack=false; }
