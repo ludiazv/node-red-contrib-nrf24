@@ -81,7 +81,7 @@
 
 <script type="text/x-red" data-help-name="RF24input">
   <p>Plain RF24 input node</p>
-  <p> This node enable node red to receive nrf24 payloads. Once a payload
+  <p> This node enables node-red to receive nrf24 payloads. Once a payload
       this node emitts a new message. Radio payloads are binary <code>Buffers</code> set on
       output's <code>msg.payload</code> property.
   </p>
@@ -105,7 +105,7 @@
     <li><code>msg.pipAddress</code> - <i>string</i> - configured input pipe address in hex format </li>
   </ul>
 
-  <p><b>Details</b></p>
+  <h3>Details</h3>
   <p> Merging logic enable better streaming performance. To enable merging <code>Merge frames</code> should
       be set with the expected number of frames in the period defined in <code>Merge time</code> in milliseconds.
       If mergin is configured the node will emitt new message over the output when the number of
