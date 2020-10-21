@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-nrf24",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "NODE-Red fredom for nrf24l01(+)! Control nrf24l01(+) radios , RF24Mesh & RF24Gateway networks from Node-Red",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
