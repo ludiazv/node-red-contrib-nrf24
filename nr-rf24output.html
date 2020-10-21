@@ -4,7 +4,7 @@
       <input type="text" id="node-input-name" />
   </div>
   <div class="form-row">
-      <label for="node-input-radio"><i class="fa fa-microchip"></i> RF24 Radio</label>
+      <label for="node-input-radio"><i class="fa fa-microchip"></i> Radio</label>
       <input type="text" id="node-input-radio" />
   </div>
   <div class="form-row">
@@ -18,7 +18,7 @@
        style="width: 60%;"/>
   </div>
   <div class="form-row">
-     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto-Ack</label>
+     <label for="node-input-autoack"><i class="fa fa-check"></i> Auto Ack</label>
      <input type="checkbox" id="node-input-autoack" style="width: 60%;" />
   </div>
   <div class="form-row">
@@ -34,7 +34,7 @@
     </select>
   </div>
   <div class="form-row">
-    <label for="node-input-mergetimeout"><i class="fa fa-stream"></i> Stream size</label>
+    <label for="node-input-streamsize"><i class="fa fa-stream"></i> Stream size</label>
       <input type="text" id="node-input-streamsize">
   </div>
 
@@ -80,6 +80,56 @@
 </script>
 
 <script type="text/x-red" data-help-name="RF24input">
-    <p>RF24 OutputPipe</p>
-    <p> TODO </p>
+  <p>Plain RF24 output node</p>
+  <p> This node enables node-red to send nrf24 payloads. The node has one input and
+      one output. Any message injected into the input will be processed and it's <code>msg.payload</code>
+      sent over the radio. This message is reused and redirected to the ouput including an extra boolean field 
+      <code>msg.rf24_ack</code> to control if the message was delivered.
+  </p>
+  <h3>Configuration</h3>
+  <ul>
+    <li><code>Name</code> - Name of the node for identification</li>
+    <li><code>Radio</code> - Radio node to use (reference to configuration node) </li>
+    <li><code>Topic</code> - Topic set in the output message <code>msg.topic</code>. Set this to empty to reuse input's message topic</li>
+    <li><code>Addr</code>  - Remote Pipe address to send incoming payloads.</li>
+    <li><code>Auto Ack</code> - Use auto ack feature for the transfer.</li>
+    <li><code>Hide stats</code> - Hides stats on node status bar</li>
+    <li><code>Write mode</code> - Sending mode. Sync & Async write will send only a single frame.</li>
+    <li><code>Steam size</code> - If mode streaming is selected. The maximun size in bytes to be streamed.</li>
+  </ul>
+  <h3>Input</h3>
+  <ul>
+    <li><code>msg.payload</code> - Buffer or any value that can be converted into a buffer.</li>
+    <li><code>msg.pipeAddressW</code> - Overwrite the remote address of the output node (optional)</li>
+    <li><code>msg.pipeAckW</code> - Overwrite the auto ack activation of the output node (optional)</li>
+  </ul>
+  <h3>Outputs</h3>
+    <p>The input msg is reused in the output. Any information included in the input message
+      will be passed to the output with the exeception of the following fields:
+    </p>
+  <ul>
+    <li><code>msg.rf24_ack</code> - boolean with the confirmation of ack receiver. If the pipe is not configured with auto ack feature this field will be allways <i>true</i></li>
+    <li><code>msg.topic</code> - if configured topic is not empty ("") </li>
+  </ul>
+
+  <h3>Details</h3>
+  <p> nrf24l01 radios only have one writting pipe. This means that the radio can only
+      send to one address each time. You can, however, insert several output nodes in
+      your flows. The radio will manage to switch betwen different address and parameters. 
+  </p>
+  <p> Single write (Sync or Async) have can send payloads up to the maximun size 
+      configured at radio level (see radio configuration node). If the payload's size
+      is bigger than the maximun size defined the payload will be croped.
+  </p>
+  <p> To send larger buffer in a sequential way <i>Stream</i> mode can be selected. In this mode
+    the output node will send several frames over the radio to the selected address with high performance.
+    The maximun streamable size is configured in the <code>Stream Size</code> configuration parameter of the 
+    output node. If the input payload is larger thant <code>Stream Size</code> the payload will be croped.
+  </p>
+  <p>
+    If auto-ack feature is enabled on the pipe and the node is configured to stream 
+    buffers. The transmission will be aborted if one frame/payload is not acknowledged. Therefore for each
+    application a balance between performance (bigger stream size) and link realeability.
+  </p>
+
 </script>
