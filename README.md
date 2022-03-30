@@ -33,7 +33,7 @@ npm install node-red-contrib-nrf24
 If you experience any problems try to install __nrf24__ first:
 
 ```bash
-npm install nrf24@0.1.7-beta
+npm install nrf24@0.2.0-beta
 npm install node-red-contrib-nrf24
 ```
 
@@ -130,6 +130,10 @@ editor menu *Import>Examples>nrf24*.
 - ~~Document nodes for node red editor (HTML view).
 
 ## Change Log
+
+- V0.3.0 Upgrade nrf24 0.2
+  - Requires nodejs >12
+  - Includes precompiled binaries.
 
 - V0.2.0 Bump to nrf24 0.1.7
   - Static compilation of base libraries.
