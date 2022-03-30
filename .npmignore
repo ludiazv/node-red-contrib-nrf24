@@ -11,3 +11,4 @@ images/*
 .travis.yml
 .no-travis.yml
 .github
+.eslintrc.yml
