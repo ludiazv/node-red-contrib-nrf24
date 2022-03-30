@@ -9,4 +9,5 @@ ssh_keys.sh
 npm_link.sh
 images/*
 .travis.yml
+.no-travis.yml
 .github
